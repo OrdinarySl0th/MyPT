@@ -3,28 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercise Buddy</title>
-    <!-- Link to your external CSS file -->
-    <link rel="stylesheet" href="styles.css">
+    <title>Textbook Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            <h1>Exercise Buddy</h1>
-        </div>
-        <div class="chat-messages" id="chat-messages">
-            <div class="message bot-message">
-                Hi there! I'm your Exercise Buddy. How can I help you with your fitness journey today?
-            </div>
-            <!-- More messages will be added here dynamically -->
-        </div>
-        <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="send-button">Send</button>
-        </div>
+        <h1>Textbook Chatbot</h1>
+        <div id="chat-display"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+        <input type="file" id="file-upload" accept=".pdf">
+        <button id="upload-button">Upload Textbook</button>
+        <div id="upload-status"></div>
     </div>
-
-    <!-- Link to your external JavaScript file -->
-    <script src="javascript.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
