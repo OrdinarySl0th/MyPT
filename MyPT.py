@@ -3,18 +3,21 @@ from flask_cors import CORS
 import PyPDF2
 from pinecone import Pinecone
 from sentence_transformers import SentenceTransformer
-import openai
+import anthropic
 import uuid
 import os
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize Pinecone, OpenAI, and SentenceTransformer
-pc = Pinecone(api_key="e7dc8a53-f644-48fe-a8f2-875cdf161aa5")
+# Initialize Pinecone, SentenceTransformer, and Anthropic
+pc = Pinecone(api_key="")
 index = pc.Index("textboook-index")
-openai.api_key = "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"
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+anthropic_client = anthropic.Anthropic(api_key="")
 
 def extract_text_from_pdf(pdf_path):
     with open(pdf_path, 'rb') as file:
@@ -38,26 +41,35 @@ def add_textbook_to_index(pdf_path):
         
         return True
     except Exception as e:
-        print(f"Error adding textbook: {e}")
+        logging.error(f"Error adding textbook: {e}")
         return False
 
 def get_relevant_context(query):
-    query_embedding = get_embedding(query)
-    results = index.query(vector=query_embedding, top_k=3, include_metadata=True)
-    context = ""
-    for match in results['matches']:
-        context += f"\nFrom {match['metadata']['source']}:\n{match['metadata']['text']}\n"
-    return context
+    try:
+        query_embedding = get_embedding(query)
+        results = index.query(vector=query_embedding, top_k=3, include_metadata=True)
+        context = ""
+        for match in results['matches']:
+            context += f"\nFrom {match['metadata']['source']}:\n{match['metadata']['text']}\n"
+        return context
+    except Exception as e:
+        logging.error(f"Error in get_relevant_context: {str(e)}")
+        return ""
 
 def get_ai_response(query, context):
-    response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
-      messages=[
-            {"role": "system", "content": "You are a helpful assistant that answers questions based on textbook information. Use the provided context to answer the user's question. If the context doesn't contain relevant information, say so."},
-            {"role": "user", "content": f"Context: {context}\n\nQuestion: {query}"}
-        ]
-    )
-    return response.choices[0].message['content']
+    try:
+        response = anthropic_client.messages.create(
+            model="claude-2.1",
+            max_tokens=1000,
+            system="you are a knowledgeable assistant who takes in information about injuries or aches and pains and goals from a user and then will pretend to be a physical therapist and output an organized exercise plan with instructions on how to perform the suggested exercises using Markdown. Use headers, lists, bold, italic, and code blocks. The plan will cover the next 4 weeks and should will help them get free of their pain and get them started towards their goals.",
+            messages=[
+                {"role": "user", "content": f"Context: {context}\n\nQuestion: {query}"}
+            ]
+        )
+        return response.content[0].text
+    except Exception as e:
+        logging.error(f"Error in get_ai_response: {str(e)}")
+        return "I'm sorry, but I encountered an error while processing your request."
 
 @app.route('/')
 def home():
@@ -65,10 +77,15 @@ def home():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_message = request.json['message']
-    context = get_relevant_context(user_message)
-    response = get_ai_response(user_message, context)
-    return jsonify({'response': response})
+    try:
+        app.logger.debug(f"Received chat request: {request.json}")
+        user_message = request.json['message']
+        context = get_relevant_context(user_message)
+        response = get_ai_response(user_message, context)
+        return jsonify({'response': response})
+    except Exception as e:
+        logging.error(f"Error in chat route: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/upload', methods=['POST'])
 def upload_textbook():
