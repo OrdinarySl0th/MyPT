@@ -57,3 +57,75 @@ button:hover {
     margin-top: 10px;
     color: #666;
 }
+
+/* New styles for Markdown formatting */
+.message {
+    margin-bottom: 10px;
+}
+
+.message strong {
+    font-weight: bold;
+    color: #333;
+}
+
+.message span h1,
+.message span h2,
+.message span h3 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.message span h1 {
+    font-size: 1.5em;
+}
+
+.message span h2 {
+    font-size: 1.3em;
+}
+
+.message span h3 {
+    font-size: 1.1em;
+}
+
+.message span ul,
+.message span ol {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.message span li {
+    margin-bottom: 5px;
+}
+
+.message span code {
+    background-color: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.message span pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: monospace;
+    margin-bottom: 10px;
+}
+
+.message span blockquote {
+    border-left: 3px solid #ccc;
+    margin: 0;
+    padding-left: 10px;
+    color: #666;
+}
+
+.message span a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.message span a:hover {
+    text-decoration: underline;
+}
