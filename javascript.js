@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(response => response.json())
             .then(data => {
-                displayMessage('Bot', data.response);
+                displayMessage('Bot', data.response, true);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -37,9 +37,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function displayMessage(sender, message) {
-        const messageElement = document.createElement('p');
-        messageElement.textContent = `${sender}: ${message}`;
+    function displayMessage(sender, message, isMarkdown = false) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        
+        const senderElement = document.createElement('strong');
+        senderElement.textContent = `${sender}: `;
+        messageElement.appendChild(senderElement);
+
+        const contentElement = document.createElement('span');
+        if (isMarkdown && typeof marked !== 'undefined') {
+            contentElement.innerHTML = marked.parse(message);
+        } else {
+            contentElement.textContent = message;
+        }
+        messageElement.appendChild(contentElement);
+
         chatDisplay.appendChild(messageElement);
         chatDisplay.scrollTop = chatDisplay.scrollHeight;
     }
